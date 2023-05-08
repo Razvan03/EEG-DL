@@ -174,6 +174,9 @@ Iter 300, Testing Accuracy: 0.50714284, Training Accuracy: 1.0
 Iter 300, Testing Loss: 0.21795654, Training Loss: 0.03447302
 Learning rate is  3.125e-06
 ```
+
+The trained CNN resulting after the outpot above is found [here](https://github.com/Razvan03/EEG-DL/tree/master/Saved_Files):
+
 ## Conclusion
 The output of my main-CNN is showing that the model is learning, but the performance is not ideal. The training accuracy reaches 1.0, which suggests that the model is overfitting the training data. The testing accuracy, on the other hand, is quite low, fluctuating between around 0.47 and 0.52.
 The resulting Convolutional_Neural_Network is saved [here]().
