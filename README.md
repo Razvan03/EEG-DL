@@ -73,7 +73,7 @@
     $ python MIND_Get_EDF.py
   ```
 
-2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/SuperBruceJia/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
+2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/Razvan03/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
 	I used a conda environment with Python 2.7 using ```text $ conda create --name EEG2.7 python=2.7 ``` in cmd.
 	
 Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
@@ -82,47 +82,11 @@ Then I ran the python script using the line below and it created a .mat dataset 
     $ python Extract-Raw-Data-Into-Matlab-Files.py
    ```
 
-3. Preprocessed the Dataset via the Matlab and save the data into the Excel files (training_set, training_label, test_set, and test_label) via [these scripts](https://github.com/SuperBruceJia/EEG-DL/tree/master/Preprocess_EEG_Data) with regards to different models. FYI, every lines of the Excel file is a sample, and the columns can be regarded as features, e.g., 4096 columns mean 64 channels X 64 time points. Later, the models will reshape 4096 columns into a Matrix with the shape 64 channels X 64 time points. You should can change the number of columns to fit your own needs, e.g., the real dimension of your own Dataset.
-	Because the matlab script was running out of memory while trying to save the large dataset as an Excel file I modified the script above with a function to save the excels in chunks:
-```text
-	%%
-function save_data_in_chunks(file_prefix, data)
-    chunk_size = 500; % You can adjust the chunk size based on the available memory
-    num_chunks = ceil(size(data, 1) / chunk_size);
-for i = 1:num_chunks
-        start_row = (i - 1) * chunk_size + 1;
-        end_row = min(i * chunk_size, size(data, 1));
-        data_chunk = data(start_row:end_row, :);
-        file_name = sprintf('%s_chunk_%d.xlsx', file_prefix, i);
-        xlswrite(file_name, data_chunk);
-    end
-end
-	```
-	Then I used python to concatenate the excels files in one big file for the 6 sets [here](https):
-	```text
-	import pandas as pd
-import glob
+3. Preprocessed the Dataset via the Matlab and save the data into the Excel files (training_set, training_label, test_set, and test_label) via [these scripts](https://github.com/Razvan03/EEG-DL/blob/master/Preprocess_EEG_Data/For-CNN-based-Models/Preprocess_EEG_Dataset.m) with regards to different models. FYI, every lines of the Excel file is a sample, and the columns can be regarded as features, e.g., 4096 columns mean 64 channels X 64 time points. Later, the models will reshape 4096 columns into a Matrix with the shape 64 channels X 64 time points. You should can change the number of columns to fit your own needs, e.g., the real dimension of your own Dataset.
+	Because the matlab script was running out of memory while trying to save the large dataset as an Excel file I modified the script above with a [function](https://github.com/Razvan03/EEG-DL/blob/master/Preprocess_EEG_Data/For-CNN-based-Models/save_data_in_chunks.m) to save the excels in chunks:
 
-def read_excel_chunks(file_prefix, output_file):
-    chunk_files = sorted(glob.glob(file_prefix + "_chunk_*.xlsx"))
-    writer = pd.ExcelWriter(output_file, engine='xlsxwriter', options={'use_zip64': True})
-
-    start_row = 0
-    for file in chunk_files:
-        data_chunk = pd.read_excel(file)
-        data_chunk.to_excel(writer, startrow=start_row, index=False)
-
-        start_row += len(data_chunk) + 1
-
-    writer.save()
-
-read_excel_chunks('training_set', 'training_set_concatenated.xlsx')
-read_excel_chunks('test_set', 'test_set_concatenated.xlsx')
-read_excel_chunks('training_label', 'training_label_concatenated.xlsx')
-read_excel_chunks('test_label', 'test_label_concatenated.xlsx')
-read_excel_chunks('all_data', 'all_data_concatenated.xlsx')
-read_excel_chunks('all_labels', 'all_labels_concatenated.xlsx')
-```
+Then I used a [python script](https://github.com/Razvan03/EEG-DL/blob/master/Preprocess_EEG_Data/For-CNN-based-Models/concatenate.py) to concatenate the chunks files into 3 sets and 3 labels .csv files.
+	
 	
 4. ***(Prerequsites)*** Train and test deep learning models **under the Python 3.6 Environment (Highly Recommended)** for EEG signals / tasks classification via [the EEG-DL library](https://github.com/SuperBruceJia/EEG-DL/tree/master/Models), which provides multiple SOTA DL models.
 
@@ -141,7 +105,7 @@ After installing tensorflow-gpu 1.13.1 it came with CUDA 11.2 as default which i
 ```text
 conda install -c anaconda cudatoolkit=10.0 cudnn=7.6.5
 ```
-To train the CNN model on my database I ran the main-CNN.py :
+To train the CNN model on my database I ran the [main-CNN.py](https://github.com/Razvan03/EEG-DL/blob/master/main-CNN.py) :
 ```text
 python main-CNN.py
 ```
@@ -234,6 +198,13 @@ At the root of the project, you will see:
 ├── Logo.png
 ├── MANIFEST.in
 ├── Models
+│   ├── DatasetEEG
+│   │   ├── all_data.csv
+│   │   ├── all_labels.csv
+│   │   ├── test_label.csv
+│   │   ├── test_set.csv
+│   │   ├── training_label.csv
+│   │   └── training_set.csv
 │   ├── DatasetAPI
 │   │   └── DataLoader.py
 │   ├── Evaluation_Metrics
