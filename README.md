@@ -179,7 +179,7 @@ The trained CNN that resulted from the iterations above is available [here](http
 
 ## Conclusion
 The output of my main-CNN is showing that the model is learning, but the performance is not ideal. The training accuracy reaches 1.0, which suggests that the model is overfitting the training data. The testing accuracy, on the other hand, is quite low, fluctuating between around 0.47 and 0.52.
-The resulting Convolutional_Neural_Network is saved [here]().
+
 For future tries, I am gonna adjust the architecture of the CNN by adding or removing layers, changing the number of filters, or modifying the filter sizes or add regularization methods like L1, L2, or Dropout to prevent overfitting.
 ## Structure of the Code
 
