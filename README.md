@@ -110,7 +110,7 @@ To train the CNN model on my database I ran the [main-CNN.py](https://github.com
 python main-CNN.py
 ```
 	
-i)Training number #1 was made on a 20-subjects database which resulted in an OOM. This error typically occurs when your GPU runs out of memory during the model training or evaluation process.
+i)Training number #1 was made on a 20-subjects database which resulted in an OOM(Out of Memory). This error typically occurs when your GPU runs out of memory during the model training or evaluation process.
 
 ii)Training number #2. I reduced the subject to 10 and then it trained for 300 iterations (num_epoch = 300 ). The following output is obtained:
 ```text
