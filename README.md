@@ -27,14 +27,8 @@
 <ul>
 <li><a href="#Documentation">Documentation</a></li>
 <li><a href="#Usage-Demo">Usage Demo</a></li>
-<li><a href="#Notice">Notice</a></li>
-<li><a href="#Research-Ideas">Research Ideas</a></li>
-<li><a href="#Common-Issues">Common Issues</a></li>
 <li><a href="#Structure-of-the-Code">Structure of the Code</a></li>
 <li><a href="#Citation">Citation</a></li>
-<li><a href="#Other-Useful-Resources">Other Useful Resources</a></li>
-<li><a href="#Contribution">Contribution</a></li>
-<li><a href="#Organizations">Organizations</a></li>
 </ul>
 
 ## Documentation
@@ -69,22 +63,6 @@
 | 25    | Transformer [[Paper]](https://arxiv.org/abs/1706.03762) [[Paper]](https://arxiv.org/abs/2010.11929) | [Transformer](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/main-Transformer.py) |
 | 26    | Transfer Learning with Transformer <br> (**This code is only for reference!**) <br> (**You can modify the codes to fit your data.**) | Stage 1: [Pre-training](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/main-pretrain_model.py) <br> Stage 2: [Fine Tuning](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/main-finetuning_model.py) |
 
-**One EEG Motor Imagery (MI) benchmark** is currently supported. Other benchmarks in the field of EEG or BCI can be found [here](https://github.com/meagmohit/EEG-Datasets).
-
-| No.     | Dataset                                                                          | Tutorial |
-| :----:  | :----:                                                                           | :----:   |
-| 1       | [EEG Motor Movement/Imagery Dataset](https://archive.physionet.org/pn4/eegmmidb/) | [Tutorial](https://github.com/SuperBruceJia/EEG-Motor-Imagery-Classification-CNNs-TensorFlow)|
-
-**The evaluation criteria** consists of
-
-| Evaluation Metrics 					                                    | Tutorial |
-| :----:                                                                    | :----:   |
-| Confusion Matrix | [Tutorial](https://towardsdatascience.com/understanding-confusion-matrix-a9ad42dcfd62) |
-| Accuracy / Precision / Recall / F1 Score / Kappa Coefficient | [Tutorial](https://towardsdatascience.com/understanding-confusion-matrix-a9ad42dcfd62) |
-| Receiver Operating Characteristic (ROC) Curve / Area under the Curve (AUC)| - |
-| Paired-wise t-test via R language | [Tutorial](https://www.analyticsvidhya.com/blog/2019/05/statistics-t-test-introduction-r-implementation/) |
-
-*The evaluation metrics are mainly supported for **four-class classification**. If you wish to switch to two-class or three-class classification, please modify [this file](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/Evaluation_Metrics/Metrics.py) to adapt to your personal Dataset classes. Meanwhile, the details about the evaluation metrics can be found in [this paper](https://iopscience.iop.org/article/10.1088/1741-2552/ab4af6/meta).*
 
 ## Usage Demo
 
@@ -95,15 +73,86 @@
     ```
 
 2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/SuperBruceJia/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
-
+	I used a conda environment with Python 2.7 using ```text $ conda create --name EEG2.7 python=2.7 ``` in cmd. I installed the following pip list:
+	```text
+	Package                       Version
+----------------------------- -------------------
+backports.functools-lru-cache 1.6.4
+beautifulsoup4                4.9.3
+bs4                           0.0.1
+certifi                       2020.6.20
+chardet                       4.0.0
+et-xmlfile                    1.0.1
+idna                          2.10
+jdcal                         1.4.1
+numpy                         1.16.6
+openpyxl                      2.6.4
+pandas                        0.24.2
+pip                           19.3.1
+pyEDFlib                      0.1.18
+python-dateutil               2.8.2
+pytz                          2023.3
+requests                      2.27.1
+scipy                         1.2.3
+setuptools                    44.0.0.post20200106
+six                           1.16.0
+soupsieve                     1.9.6
+urllib3                       1.26.15
+wheel                         0.37.1
+wincertstore                  0.2
+xlrd                          1.2.0
+XlsxWriter                    2.0.0
+	```
+	Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
     ```text
     $ python Extract-Raw-Data-Into-Matlab-Files.py
     ```
 
 3. Preprocessed the Dataset via the Matlab and save the data into the Excel files (training_set, training_label, test_set, and test_label) via [these scripts](https://github.com/SuperBruceJia/EEG-DL/tree/master/Preprocess_EEG_Data) with regards to different models. FYI, every lines of the Excel file is a sample, and the columns can be regarded as features, e.g., 4096 columns mean 64 channels X 64 time points. Later, the models will reshape 4096 columns into a Matrix with the shape 64 channels X 64 time points. You should can change the number of columns to fit your own needs, e.g., the real dimension of your own Dataset.
+	Because the matlab script was running out of memory while trying to save the large dataset as an Excel file I modified the script above with a function to save the excels in chunks:
+	```text
+	%%
+function save_data_in_chunks(file_prefix, data)
+    chunk_size = 500; % You can adjust the chunk size based on the available memory
+    num_chunks = ceil(size(data, 1) / chunk_size);
+for i = 1:num_chunks
+        start_row = (i - 1) * chunk_size + 1;
+        end_row = min(i * chunk_size, size(data, 1));
+        data_chunk = data(start_row:end_row, :);
+        file_name = sprintf('%s_chunk_%d.xlsx', file_prefix, i);
+        xlswrite(file_name, data_chunk);
+    end
+end
+	```
+	Then I used python to concatenate the excels files in one big file for the 6 sets [here](https):
+	```text
+	import pandas as pd
+import glob
 
+def read_excel_chunks(file_prefix, output_file):
+    chunk_files = sorted(glob.glob(file_prefix + "_chunk_*.xlsx"))
+    writer = pd.ExcelWriter(output_file, engine='xlsxwriter', options={'use_zip64': True})
+
+    start_row = 0
+    for file in chunk_files:
+        data_chunk = pd.read_excel(file)
+        data_chunk.to_excel(writer, startrow=start_row, index=False)
+
+        start_row += len(data_chunk) + 1
+
+    writer.save()
+
+read_excel_chunks('training_set', 'training_set_concatenated.xlsx')
+read_excel_chunks('test_set', 'test_set_concatenated.xlsx')
+read_excel_chunks('training_label', 'training_label_concatenated.xlsx')
+read_excel_chunks('test_label', 'test_label_concatenated.xlsx')
+read_excel_chunks('all_data', 'all_data_concatenated.xlsx')
+read_excel_chunks('all_labels', 'all_labels_concatenated.xlsx')
+	```
+	
 4. ***(Prerequsites)*** Train and test deep learning models **under the Python 3.6 Environment (Highly Recommended)** for EEG signals / tasks classification via [the EEG-DL library](https://github.com/SuperBruceJia/EEG-DL/tree/master/Models), which provides multiple SOTA DL models.
 
+	First, I needed to create another conda environment using ```text conda create --name EEG3.6 python=3.6 ``` with TensorFlow GPU version 1.13.1
     ```text
     Python Version: Python 3.6 (Recommended)
     TensorFlow Version: TensorFlow 1.13.1
@@ -114,133 +163,81 @@
     ```python
     $ pip install --upgrade --force-reinstall tensorflow-gpu==1.13.1 --user
     ```
-
-5. Read evaluation criterias (through iterations) via the [Tensorboard](https://www.tensorflow.org/tensorboard). You can follow [this tutorial](https://www.guru99.com/tensorboard-tutorial.html). When you finished training the model, you will find the "events.out.tfevents.***" in the folder, e.g., "/Users/shuyuej/Desktop/trained_model/". You can use the following command in your terminal:
-
-    ```python
-    $ tensorboard --logdir="/Users/shuyuej/Desktop/trained_model/" --host=127.0.0.1
-    ```
-
-    You can open the website in the [Google Chrome](https://www.google.com/chrome/) (Highly Recommended). 
-    
-    ```html
-    http://127.0.0.1:6006/
-    ```
-
-    Then you can read and save the criterias into Excel .csv files.
-
-6. Finally, draw beautiful paper photograph using Matlab or Python. Please follow [these scripts](https://github.com/SuperBruceJia/EEG-DL/tree/master/Draw_Photos).
-
-## Notice
-1. I have tested all the files (Python and Matlab) under the macOS. Be advised that for some Matlab files, several Matlab functions are different between Windows Operating System (OS) and macOS. For example, I used "readmatrix" function to read CSV files in the MacOS. However, I have to use “csvread” function in the Windows because there was no such "readmatrix" Matlab function in the Windows. If you have met similar problems, I recommend you to Google or Baidu them. You can definitely work them out.
-
-2. For the GCNs-Net (GCN Model), for the graph Convolutional layer, the dimensionality of the graph will be unchanged, and for the max-pooling layer, the dimensionality of the graph will be reduced by 2. That means, if you have N X N graph Laplacian, after the max-pooling layer, the dimension will be N/2 X N/2. If you have a 15-channel EEG system, it cannot use max-pooling unless you selected 14 --> 7 or 12 --> 6 --> 3 or 10 --> 5 or 8 --> 4 --> 2 --> 1, etc. The details can be reviewed from [this paper](https://arxiv.org/abs/2006.08924).
-
-3. The **Loss Function** can be changed or modified from [this file](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/Loss_Function/Loss.py).
-
-4. The **Dataset Loader** can be changed or modified from [this file](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/DatasetAPI/DataLoader.py).
-
-## Research Ideas
-1. Dynamic Graph Convolutional Neural Networks [[Paper Survey]](https://shuyuej.com/files/EEG/Dynamic-GCN-Survey.pdf) [[Paper Reading]](https://github.com/SuperBruceJia/paper-reading/tree/master/Graph-Neural-Network/Dynamic-GCN-Papers)
-
-2. Neural Architecture Search / AutoML (Automatic Machine Learning) [[Tsinghua AutoGraph]](https://github.com/THUMNLab/AutoGL)
-
-3. Reinforcement Learning Algorithms (_e.g._, Deep Q-Learning) [[Tsinghua Tianshou]](https://github.com/thu-ml/tianshou) [[Doc for Chinese Readers]](https://tianshou.readthedocs.io/zh/latest/docs/toc.html)
-
-4. Bayesian Convolutional Neural Networks [[Paper]](https://arxiv.org/abs/1901.02731) [[Thesis]](https://github.com/kumar-shridhar/Master-Thesis-BayesianCNN/raw/master/thesis.pdf) [[Codes]](https://github.com/SuperBruceJia/EEG-BayesianCNN)
-
-5. Transformer / Self-attention / Non-local Modeling [[Paper Collections]](https://github.com/SuperBruceJia/paper-reading/tree/master/Machine-Learning/Transformer) [[Transformer Codes]](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/main-Transformer.py) [[Non-local Modeling PyTorch Codes]](https://github.com/SuperBruceJia/NLNet-IQA)
-
-	[[Why Non-local Modeling?]](https://github.com/SuperBruceJia/NLNet-IQA) [[Paper]](https://shuyuej.com/files/MMSP/MMSP22_Paper.pdf) [[A Detailed Presentation]](https://shuyuej.com/files/Presentation/A_Summary_Three_Projects.pdf) [[Slides]](https://shuyuej.com/files/MMSP/MMSP22_Slides.pdf) [[Poster]](https://shuyuej.com/files/MMSP/MMSP22_Poster.pdf)
+	After installing tensorflow-gpu 1.13.1 it came with CUDA 11.2 as default which isn't compatible with my version of tensorflow. So I unninstalled it manually and then nstalled the CUDA Toolkit 10.0 and cuDNN 7.6.x using conda:
+	```text
+	conda install -c anaconda cudatoolkit=10.0 cudnn=7.6.5
+	```
+	To train the CNN model on my database I ran the main-CNN.py :
+	```text
+	python main-CNN.py
+	```
 	
-	[[Why Transformer?]](https://github.com/SuperBruceJia/paper-reading/blob/master/Transformer/Swin%20Transformer%20and%205%20Reasons%20to%20Use%20Transformer:Attention%20in%20Computer%20Vision.pdf)
-	
-	[[Transformer and Attention Mechanism Introduction]](https://github.com/SuperBruceJia/paper-reading/blob/master/Transformer/Towards%20Universal%20Models%20with%20NLP%20for%20Computer%20Vision.pdf) 
-		
-	[[视觉Transformer年度进展评述 (in Chinese)]](https://github.com/SuperBruceJia/paper-reading/raw/master/Transformer/%E8%A7%86%E8%A7%89Transformer%20%E5%B9%B4%E5%BA%A6%E8%BF%9B%E5%B1%95%E8%AF%84%E8%BF%B0.pdf) 
+	i)Training number #1 was made on a 20-subjects database which resulted in an OOM. This error typically occurs when your GPU runs out of memory during the model training or evaluation process.
+	ii)Training number #2. I reduced the subject to 10 and then it trained for 300 iterations (num_epoch = 300 ). The following output is obtained:
+	```text
+	Iter 0, Testing Accuracy: 0.47142857, Training Accuracy: 0.51
+Iter 0, Testing Loss: 0.74734324, Training Loss: 0.744785
+Learning rate is  1e-04
 
-6. Self-supervised Learning + Transformer [[Presentation]](https://github.com/SuperBruceJia/paper-reading/raw/master/Transformer/Self-Supervised%20Learning%20in%20Computer%20Vision-%20Past%2C%20Present%2C%20Trends.pdf)
 
-## Common Issues
-1. **ValueError: Cannot feed value of shape (1024, 1) for Tensor 'input/label:0', which has shape '(1024,)'**
+Iter 1, Testing Accuracy: 0.48333332, Training Accuracy: 0.54
+Iter 1, Testing Loss: 0.5743346, Training Loss: 0.56509113
+Learning rate is  1e-04
 
-    To solve this issue, you have to squeeze the shape of the labels from (1024, 1) to (1024,) using np.squeeze. Please edit the [DataLoader.py file](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/DatasetAPI/DataLoader.py).
-    From original codes:
-    ```python
-    train_labels = pd.read_csv(DIR + 'training_label.csv', header=None)
-    train_labels = np.array(train_labels).astype('float32')
 
-    test_labels = pd.read_csv(DIR + 'test_label.csv', header=None)
-    test_labels = np.array(test_labels).astype('float32')
-    ```
-    to
-    ```python
-    train_labels = pd.read_csv(DIR + 'training_label.csv', header=None)
-    train_labels = np.array(train_labels).astype('float32')
-    train_labels = np.squeeze(train_labels)
+Iter 2, Testing Accuracy: 0.4845238, Training Accuracy: 0.56
+Iter 2, Testing Loss: 0.5004847, Training Loss: 0.49093938
+Learning rate is  1e-04
 
-    test_labels = pd.read_csv(DIR + 'test_label.csv', header=None)
-    test_labels = np.array(test_labels).astype('float32')
-    test_labels = np.squeeze(test_labels)
-    ```
 
-2. **InvalidArgumentError: Nan in summary histogram for training/logits/bias/gradients**
-    
-    To solve this issue, you have to comment all the histogram summary. Please edit the [GCN_Model.py file](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/Network/lib_for_GCN/GCN_Model.py).
+Iter 3, Testing Accuracy: 0.4952381, Training Accuracy: 0.53
+Iter 3, Testing Loss: 0.47017473, Training Loss: 0.46240148
+Learning rate is  1e-04
 
-    ```python
-    # Comment the above tf.summary.histogram from the GCN_Model.py File
 
-    # # Histograms.
-    # for grad, var in grads:
-    #     if grad is None:
-    #         print('warning: {} has no gradient'.format(var.op.name))
-    #     else:
-    #         tf.summary.histogram(var.op.name + '/gradients', grad)
+Iter 4, Testing Accuracy: 0.4940476, Training Accuracy: 0.65
+Iter 4, Testing Loss: 0.45639592, Training Loss: 0.43720686
+Learning rate is  1e-04
 
-    def _weight_variable(self, shape, regularization=True):
-        initial = tf.truncated_normal_initializer(0, 0.1)
-        var = tf.get_variable('weights', shape, tf.float32, initializer=initial)
-        if regularization:
-            self.regularizers.append(tf.nn.l2_loss(var))
-        # tf.summary.histogram(var.op.name, var)
-        return var
 
-    def _bias_variable(self, shape, regularization=True):
-        initial = tf.constant_initializer(0.1)
-        var = tf.get_variable('bias', shape, tf.float32, initializer=initial)
-        if regularization:
-            self.regularizers.append(tf.nn.l2_loss(var))
-        # tf.summary.histogram(var.op.name, var)
-        return var
-    ```
+Iter 5, Testing Accuracy: 0.48214287, Training Accuracy: 0.54
+Iter 5, Testing Loss: 0.45120627, Training Loss: 0.432128
+Learning rate is  1e-04
+......
+......
+......
+Iter 295, Testing Accuracy: 0.51785713, Training Accuracy: 1.0
+Iter 295, Testing Loss: 0.21398115, Training Loss: 0.034377642
+Learning rate is  3.125e-06
 
-3. **TypeError: len() of unsized object**
-    
-    To solve this issue, you have to change the coarsen level to your own needs, and you can definitely change it to see the difference. Please edit the [main-GCN.py file](https://github.com/SuperBruceJia/EEG-DL/blob/master/Models/main-GCN.py). For example, if you want to implement the GCNs-Net to a 10-channel EEG system, you have to set "levels" equal to 1 or 0 because there is at most only one max-pooling (10 --> 5). And you can change argument "level" to 1 or 0 to see the difference.
 
-    ```python
-    # This is the coarsen levels, you can definitely change the level to observe the difference
-    graphs, perm = coarsening.coarsen(Adjacency_Matrix, levels=5, self_connections=False)
-    ```
-    to
-    ```python
-    # This is the coarsen levels, you can definitely change the level to observe the difference
-    graphs, perm = coarsening.coarsen(Adjacency_Matrix, levels=1, self_connections=False)
-    ```
+Iter 296, Testing Accuracy: 0.51785713, Training Accuracy: 1.0
+Iter 296, Testing Loss: 0.21302587, Training Loss: 0.0339612
+Learning rate is  3.125e-06
 
-4. **tensorflow.python.framework.errors_impl.InvalidArgumentError: Received a label value of 7 which is outside the valid range of [0, 7).  Label values: 5 2 3 3 1 5 5 4 7 4 2 2 1 7 5 6 3 4 2 4**
-    
-    To solve this issue, for the GCNs-Net, when you make your dataset, you have to make your labels from 0 rather than 1. For example, if you have seven classes, your labels should be 0 (First class), 1 (Second class), 2 (Third class), 3 (Fourth class), 4 (Fifth class), 5 (Sixth class), 6 (Seventh class) instead of 1, 2, 3, 4, 5, 6, 7.
 
-5. **IndexError: list index out of range**
-    
-    To solve this issue, first of all, please double-check your Python Environment. **Python 2.7 Environment is required.** Besides, please install ***0.1.11*** version of ***pyEDFlib***. The installation instruction is as follows:
-    
-    ```python
-    $ pip install pyEDFlib==0.1.11
-    ```
+Iter 297, Testing Accuracy: 0.5190476, Training Accuracy: 1.0
+Iter 297, Testing Loss: 0.21510491, Training Loss: 0.035236362
+Learning rate is  3.125e-06
 
+
+Iter 298, Testing Accuracy: 0.52738094, Training Accuracy: 1.0
+Iter 298, Testing Loss: 0.21519342, Training Loss: 0.03485203
+Learning rate is  3.125e-06
+
+
+Iter 299, Testing Accuracy: 0.5107143, Training Accuracy: 1.0
+Iter 299, Testing Loss: 0.21810618, Training Loss: 0.03480571
+Learning rate is  3.125e-06
+
+
+Iter 300, Testing Accuracy: 0.50714284, Training Accuracy: 1.0
+Iter 300, Testing Loss: 0.21795654, Training Loss: 0.03447302
+Learning rate is  3.125e-06
+	```
+	The output of my main-CNN is showing that the model is learning, but the performance is not ideal. The training accuracy reaches 1.0, which suggests that the model is overfitting the training data. The testing accuracy, on the other hand, is quite low, fluctuating between around 0.47 and 0.52.
+	The resulting Convolutional_Neural_Network is saved [here]().
+	For future tries, I am gonna adjust the architecture of the CNN by adding or removing layers, changing the number of filters, or modifying the filter sizes or add regularization methods like L1, L2, or Dropout to prevent overfitting.
 ## Structure of the Code
 
 At the root of the project, you will see:
@@ -434,19 +431,6 @@ Our papers can be downloaded from:
 
 4. [Attention-based Graph ResNet for Motor Intent Detection from Raw EEG signals](https://arxiv.org/abs/2007.13484)
 
-## Other Useful Resources
-
-I think the following presentations would be helpful when you guys get engaged with Python and TensorFlow.
-
-1. Python Environment Setting-up Tutorial [download](https://github.com/SuperBruceJia/paper-reading/raw/master/other-presentations/Python-Environment-Set-up.pptx)
-
-2. Usage of Cloud Server and Setting-up Tutorial [download](https://github.com/SuperBruceJia/paper-reading/raw/master/other-presentations/Usage%20of%20Server%20and%20Setting%20Up.pdf)
-
-3. TensorFlow for Deep Learning Tutorial [download](https://github.com/SuperBruceJia/paper-reading/raw/master/other-presentations/TensorFlow-for-Deep-Learning.pdf)
-
-## Contribution
-
-We always welcome contributions to help make EEG-DL Library better. If you would like to contribute or have any questions, please don't hesitate to email me at shuyuej@ieee.org.
 
 ## Organizations
 
