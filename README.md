@@ -27,6 +27,7 @@
 <ul>
 <li><a href="#Documentation">Documentation</a></li>
 <li><a href="#Usage-Demo">Usage Demo</a></li>
+<li><a href="#Conclusion">Conclusion</a></li>
 <li><a href="#Structure-of-the-Code">Structure of the Code</a></li>
 <li><a href="#Citation">Citation</a></li>
 </ul>
@@ -68,22 +69,22 @@
 
 1. ***(Under Any Python Environment)*** Download the [EEG Motor Movement/Imagery Dataset](https://archive.physionet.org/pn4/eegmmidb/) via [this script](https://github.com/SuperBruceJia/EEG-DL/blob/master/Download_Raw_EEG_Data/MIND_Get_EDF.py).
 
-  
+  ```text
     $ python MIND_Get_EDF.py
-
+  ```
 
 2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/SuperBruceJia/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
 	I used a conda environment with Python 2.7 using ```text $ conda create --name EEG2.7 python=2.7 ``` in cmd.
 	
 Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
 	
-    ```text
+   ```text
     $ python Extract-Raw-Data-Into-Matlab-Files.py
-    ```
+   ```
 
 3. Preprocessed the Dataset via the Matlab and save the data into the Excel files (training_set, training_label, test_set, and test_label) via [these scripts](https://github.com/SuperBruceJia/EEG-DL/tree/master/Preprocess_EEG_Data) with regards to different models. FYI, every lines of the Excel file is a sample, and the columns can be regarded as features, e.g., 4096 columns mean 64 channels X 64 time points. Later, the models will reshape 4096 columns into a Matrix with the shape 64 channels X 64 time points. You should can change the number of columns to fit your own needs, e.g., the real dimension of your own Dataset.
 	Because the matlab script was running out of memory while trying to save the large dataset as an Excel file I modified the script above with a function to save the excels in chunks:
-	```text
+```text
 	%%
 function save_data_in_chunks(file_prefix, data)
     chunk_size = 500; % You can adjust the chunk size based on the available memory
@@ -121,33 +122,33 @@ read_excel_chunks('training_label', 'training_label_concatenated.xlsx')
 read_excel_chunks('test_label', 'test_label_concatenated.xlsx')
 read_excel_chunks('all_data', 'all_data_concatenated.xlsx')
 read_excel_chunks('all_labels', 'all_labels_concatenated.xlsx')
-	```
+```
 	
 4. ***(Prerequsites)*** Train and test deep learning models **under the Python 3.6 Environment (Highly Recommended)** for EEG signals / tasks classification via [the EEG-DL library](https://github.com/SuperBruceJia/EEG-DL/tree/master/Models), which provides multiple SOTA DL models.
 
 	First, I needed to create another conda environment using ```text conda create --name EEG3.6 python=3.6 ``` with TensorFlow GPU version 1.13.1
-    ```text
+  ```text
     Python Version: Python 3.6 (Recommended)
     TensorFlow Version: TensorFlow 1.13.1
-    ```
+  ```
 
-    Use the below command to install TensorFlow GPU Version 1.13.1:
+   Use the below command to install TensorFlow GPU Version 1.13.1:
 
-    ```python
+ ```python
     $ pip install --upgrade --force-reinstall tensorflow-gpu==1.13.1 --user
-    ```
-	After installing tensorflow-gpu 1.13.1 it came with CUDA 11.2 as default which isn't compatible with my version of tensorflow. So I unninstalled it manually and then nstalled the CUDA Toolkit 10.0 and cuDNN 7.6.x using conda:
-	```text
-	conda install -c anaconda cudatoolkit=10.0 cudnn=7.6.5
-	```
-	To train the CNN model on my database I ran the main-CNN.py :
-	```text
-	python main-CNN.py
-	```
+  ```
+After installing tensorflow-gpu 1.13.1 it came with CUDA 11.2 as default which isn't compatible with my version of tensorflow. So I unninstalled it manually and then nstalled the CUDA Toolkit 10.0 and cuDNN 7.6.x using conda:
+```text
+conda install -c anaconda cudatoolkit=10.0 cudnn=7.6.5
+```
+To train the CNN model on my database I ran the main-CNN.py :
+```text
+python main-CNN.py
+```
 	
-	i)Training number #1 was made on a 20-subjects database which resulted in an OOM. This error typically occurs when your GPU runs out of memory during the model training or evaluation process.
-	ii)Training number #2. I reduced the subject to 10 and then it trained for 300 iterations (num_epoch = 300 ). The following output is obtained:
-	```text
+i)Training number #1 was made on a 20-subjects database which resulted in an OOM. This error typically occurs when your GPU runs out of memory during the model training or evaluation process.
+ii)Training number #2. I reduced the subject to 10 and then it trained for 300 iterations (num_epoch = 300 ). The following output is obtained:
+```text
 	Iter 0, Testing Accuracy: 0.47142857, Training Accuracy: 0.51
 Iter 0, Testing Loss: 0.74734324, Training Loss: 0.744785
 Learning rate is  1e-04
@@ -207,10 +208,11 @@ Learning rate is  3.125e-06
 Iter 300, Testing Accuracy: 0.50714284, Training Accuracy: 1.0
 Iter 300, Testing Loss: 0.21795654, Training Loss: 0.03447302
 Learning rate is  3.125e-06
-	```
-	The output of my main-CNN is showing that the model is learning, but the performance is not ideal. The training accuracy reaches 1.0, which suggests that the model is overfitting the training data. The testing accuracy, on the other hand, is quite low, fluctuating between around 0.47 and 0.52.
-	The resulting Convolutional_Neural_Network is saved [here]().
-	For future tries, I am gonna adjust the architecture of the CNN by adding or removing layers, changing the number of filters, or modifying the filter sizes or add regularization methods like L1, L2, or Dropout to prevent overfitting.
+```
+## Conclusion
+The output of my main-CNN is showing that the model is learning, but the performance is not ideal. The training accuracy reaches 1.0, which suggests that the model is overfitting the training data. The testing accuracy, on the other hand, is quite low, fluctuating between around 0.47 and 0.52.
+The resulting Convolutional_Neural_Network is saved [here]().
+For future tries, I am gonna adjust the architecture of the CNN by adding or removing layers, changing the number of filters, or modifying the filter sizes or add regularization methods like L1, L2, or Dropout to prevent overfitting.
 ## Structure of the Code
 
 At the root of the project, you will see:
