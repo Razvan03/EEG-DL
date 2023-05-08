@@ -68,45 +68,14 @@
 
 1. ***(Under Any Python Environment)*** Download the [EEG Motor Movement/Imagery Dataset](https://archive.physionet.org/pn4/eegmmidb/) via [this script](https://github.com/SuperBruceJia/EEG-DL/blob/master/Download_Raw_EEG_Data/MIND_Get_EDF.py).
 
-    ```text
+  
     $ python MIND_Get_EDF.py
-    ```
+
 
 2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/SuperBruceJia/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
-	I used a conda environment with Python 2.7 using ```text $ conda create --name EEG2.7 python=2.7 ``` in cmd. I installed the following pip list:
-	```text
+	I used a conda environment with Python 2.7 using ```text $ conda create --name EEG2.7 python=2.7 ``` in cmd.
 	
-	Package                       Version
------------------------------ -------------------
-backports.functools-lru-cache 1.6.4
-beautifulsoup4                4.9.3
-bs4                           0.0.1
-certifi                       2020.6.20
-chardet                       4.0.0
-et-xmlfile                    1.0.1
-idna                          2.10
-jdcal                         1.4.1
-numpy                         1.16.6
-openpyxl                      2.6.4
-pandas                        0.24.2
-pip                           19.3.1
-pyEDFlib                      0.1.18
-python-dateutil               2.8.2
-pytz                          2023.3
-requests                      2.27.1
-scipy                         1.2.3
-setuptools                    44.0.0.post20200106
-six                           1.16.0
-soupsieve                     1.9.6
-urllib3                       1.26.15
-wheel                         0.37.1
-wincertstore                  0.2
-xlrd                          1.2.0
-XlsxWriter                    2.0.0
-
-	```
-	
-	Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
+Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
 	
     ```text
     $ python Extract-Raw-Data-Into-Matlab-Files.py
