@@ -88,7 +88,7 @@ Then I ran the python script using the line below and it created a .mat dataset 
 Then I used a [python script](https://github.com/Razvan03/EEG-DL/blob/master/Preprocess_EEG_Data/For-CNN-based-Models/concatenate.py) to concatenate the chunks files into 3 sets and 3 labels .csv files.
 	
 	
-4. ***(Prerequsites)*** Train and test deep learning models **under the Python 3.6 Environment (Highly Recommended)** for EEG signals / tasks classification via [the EEG-DL library](https://github.com/SuperBruceJia/EEG-DL/tree/master/Models), which provides multiple SOTA DL models.
+4. ***(Prerequsites)*** Train and test deep learning models **under the Python 3.6 Environment (Highly Recommended)** for EEG signals / tasks classification via [the EEG-DL library](https://github.com/Razvan03/EEG-DL/tree/master/Models), which provides multiple SOTA DL models.
 
 	First, I needed to create another conda environment using ```text conda create --name EEG3.6 python=3.6 ``` with TensorFlow GPU version 1.13.1
   ```text
