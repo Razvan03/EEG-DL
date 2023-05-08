@@ -235,12 +235,13 @@ highcut = 30.0
 # Save Dataset of 4 clases
 nclasses = 4
 
-# Save 20 subjects' dataset
-SAVE = '20-Subjects'
+# Save 10 subjects' dataset
+SAVE = '10-Subjects'
 if not os.path.exists(SAVE):
     os.mkdir(SAVE)
 
-subject = range(1, 21)
+# Use range(1, 11) to load data from only 10 subjects
+subject = range(1, 11)
 
 # Save 64 electrodes
 for i in range(0, 64):
@@ -249,6 +250,13 @@ for i in range(0, 64):
     Y = 'Y_' + str(i)
     X, Y = load_raw_data(electrodes=electrodes, subject=subject, num_classes=nclasses)
     X = np.squeeze(X)
+    
+    # Notch Filter
+    b, a = iirnotch(w0=60.0, Q=30.0, fs=fs)
+    X = lfilter(b, a, X)
+
+    # Butterworth Band-pass filter
+    X = butter_bandpass_filter(X, lowcut, highcut, fs, order=4)
 
     sio.savemat(SAVE + 'Dataset_%d.mat' % int(i+1), {'Dataset': X})
     sio.savemat(SAVE + 'Labels_%d.mat' % int(i+1), {'Labels': Y})
