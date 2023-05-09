@@ -74,7 +74,7 @@
   ```
 
 2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/Razvan03/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
-	I used a conda environment with Python 2.7 using ```text $ conda create --name EEG2.7 python=2.7 ``` in cmd.
+	I used a conda environment with Python 2.7 using ```$ conda create --name EEG2.7 python=2.7 ``` in cmd.
 	
 Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
 	
