@@ -74,7 +74,7 @@
   ```
 
 2. ***(Under Python 2.7 Environment)*** Read the .edf files (One of the raw EEG signals formats) and save them into Matlab .m files via [this script](https://github.com/Razvan03/EEG-DL/blob/master/Download_Raw_EEG_Data/Extract-Raw-Data-Into-Matlab-Files.py). FYI, this script must be executed under the **Python 2 environment (Python 2.7 is recommended)** due to some Python 2 syntax. If using Python 3 environment to run the file, there might be no error, but the labels of EEG tasks would be totally messed up.
-	I used a conda environment with Python 2.7 using $ conda create --name EEG2.7 python=2.7  in cmd.
+	I used a conda environment with Python 2.7 using ```$ conda create --name EEG2.7 python=2.7```  in cmd.
 	
 Then I ran the python script using the line below and it created a .mat dataset of 10 subjects for every 64 channels. I have applied a Notch Filter and Butterworth Band-pass filter in this process.
 	
@@ -90,7 +90,7 @@ Then I used a [python script](https://github.com/Razvan03/EEG-DL/blob/master/Pre
 	
 4. ***(Prerequsites)*** Train and test deep learning models **under the Python 3.6 Environment (Highly Recommended)** for EEG signals / tasks classification via [the EEG-DL library](https://github.com/Razvan03/EEG-DL/tree/master/Models), which provides multiple SOTA DL models.
 
-	First, I needed to create another conda environment using ```text conda create --name EEG3.6 python=3.6 ``` with TensorFlow GPU version 1.13.1
+	First, I needed to create another conda environment using ```$ conda create --name EEG3.6 python=3.6 ``` with TensorFlow GPU version 1.13.1
   ```text
     Python Version: Python 3.6 (Recommended)
     TensorFlow Version: TensorFlow 1.13.1
